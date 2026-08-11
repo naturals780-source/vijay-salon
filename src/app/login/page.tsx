@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -15,10 +16,21 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    // In production: use Supabase auth
-    // For now show message
-    setError("Connect Supabase Auth first. See README for admin setup.");
-    setLoading(false);
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    router.push("/admin");
+    router.refresh();
   };
 
   return (
